@@ -1,4 +1,5 @@
 import { Globe, Menu } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { ActiveView, LanguageCode } from '../types/bhoomi';
 import type { TranslationDictionary } from '../data/translations';
 import { BrandLogo } from './BrandLogo';
@@ -41,7 +42,7 @@ export function Header({
             type="button"
             onClick={onOpenMobileMenu}
             aria-label={t.nav.menuLabel}
-            className="lg:hidden inline-flex items-center justify-center w-11 h-11 -ml-2 rounded-lg text-[#1E241E] hover:bg-[#F1F2E8] focus-visible:outline-2 focus-visible:outline-[#236B45]"
+            className="lg:hidden inline-flex items-center justify-center w-11 h-11 -ml-2 rounded-lg text-[#1E241E] hover:bg-[#F1F2E8] active:scale-95 transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-[#236B45]"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -77,13 +78,19 @@ export function Header({
                   type="button"
                   onClick={() => onLanguageChange(lang.code)}
                   aria-pressed={active}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-150 whitespace-nowrap shrink-0 min-h-[34px] focus-visible:outline-2 focus-visible:outline-[#236B45] ${
-                    active
-                      ? 'bg-[#236B45] text-white shadow-xs'
-                      : 'text-[#3A4339] hover:text-[#1E241E]'
+                  className={`relative px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-150 whitespace-nowrap shrink-0 min-h-[34px] focus-visible:outline-2 focus-visible:outline-[#236B45] ${
+                    active ? 'text-white' : 'text-[#3A4339] hover:text-[#1E241E]'
                   }`}
                 >
-                  {lang.label}
+                  {active && (
+                    <motion.span
+                      layoutId="activeLanguagePill"
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute inset-0 rounded-lg bg-[#236B45] shadow-xs"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="relative z-10">{lang.label}</span>
                 </button>
               );
             })}

@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import type { ActiveView, CropFormData, LanguageCode } from './types/bhoomi';
 import { TRANSLATIONS } from './data/translations';
 import { Sidebar } from './components/Sidebar';
@@ -52,63 +53,76 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8F8F1] text-[#1E241E]">
-      <Sidebar
-        activeView={activeView}
-        onNavigate={handleNavigate}
-        t={t}
-        mobileOpen={mobileMenuOpen}
-        onCloseMobile={() => setMobileMenuOpen(false)}
-      />
-
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen flex bg-[#F8F8F1] text-[#1E241E]">
+        <Sidebar
           activeView={activeView}
-          language={language}
-          onLanguageChange={setLanguage}
-          onOpenMobileMenu={() => setMobileMenuOpen(true)}
-          onNavigateHome={() => handleNavigate('home')}
+          onNavigate={handleNavigate}
           t={t}
+          mobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
         />
 
-        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-          {activeView === 'home' && (
-            <HomeView
-              t={t}
-              onStartRecommendation={() => handleNavigate('recommend')}
-              onViewHowItWorks={() => handleNavigate('how-it-works')}
-            />
-          )}
+        <div className="flex-1 flex flex-col min-w-0">
+          <Header
+            activeView={activeView}
+            language={language}
+            onLanguageChange={setLanguage}
+            onOpenMobileMenu={() => setMobileMenuOpen(true)}
+            onNavigateHome={() => handleNavigate('home')}
+            t={t}
+          />
 
-          {activeView === 'recommend' && (
-            <CropWizard
-              formData={formData}
-              onChangeFormData={setFormData}
-              onResetForm={handleResetForm}
-              language={language}
-              t={t}
-            />
-          )}
+          <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activeView}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {activeView === 'home' && (
+                  <HomeView
+                    t={t}
+                    onStartRecommendation={() => handleNavigate('recommend')}
+                    onViewHowItWorks={() => handleNavigate('how-it-works')}
+                    onNavigate={handleNavigate}
+                  />
+                )}
 
-          {activeView === 'how-it-works' && (
-            <HowItWorksView
-              t={t}
-              onStartRecommendation={() => handleNavigate('recommend')}
-            />
-          )}
+                {activeView === 'recommend' && (
+                  <CropWizard
+                    formData={formData}
+                    onChangeFormData={setFormData}
+                    onResetForm={handleResetForm}
+                    language={language}
+                    t={t}
+                  />
+                )}
 
-          {activeView === 'about' && (
-            <AboutView
-              t={t}
-              onStartRecommendation={() => handleNavigate('recommend')}
-            />
-          )}
-        </main>
+                {activeView === 'how-it-works' && (
+                  <HowItWorksView
+                    t={t}
+                    onStartRecommendation={() => handleNavigate('recommend')}
+                  />
+                )}
 
-        <footer className="lg:hidden border-t border-[#E2E5D9] bg-white px-4 py-4 text-center text-xs text-[#6C756A]">
-          {t.footer.note}
-        </footer>
+                {activeView === 'about' && (
+                  <AboutView
+                    t={t}
+                    onStartRecommendation={() => handleNavigate('recommend')}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+
+          <footer className="lg:hidden border-t border-[#E2E5D9] bg-white px-4 py-4 text-center text-xs text-[#6C756A]">
+            {t.footer.note}
+          </footer>
+        </div>
       </div>
-    </div>
+    </MotionConfig>
   );
 }

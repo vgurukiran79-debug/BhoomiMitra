@@ -2,8 +2,10 @@ import { useState } from 'react';
 import {
   AlertCircle,
   Calendar,
+  Check,
   ChevronDown,
   ChevronUp,
+  Copy,
   Droplets,
   Edit3,
   Eye,
@@ -12,6 +14,7 @@ import {
   RotateCcw,
   Sprout,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type { CropFormData, LanguageCode } from '../types/bhoomi';
 import type { TranslationDictionary } from '../data/translations';
 import { INDIA_LOCATIONS } from '../data/locations';
@@ -33,9 +36,15 @@ export function SampleResultsView({
   onChangeInputs,
 }: SampleResultsViewProps) {
   const [showAnswers, setShowAnswers] = useState(false);
+  const [focusedCropId, setFocusedCropId] = useState<string>('all');
+  const [copied, setCopied] = useState(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const demoCrops = getDemoCropsForPreview(formData);
+  const visibleCrops =
+    focusedCropId === 'all'
+      ? demoCrops
+      : demoCrops.filter((c) => c.id === focusedCropId);
 
   const selectedState = INDIA_LOCATIONS.find((s) => s.id === formData.stateId);
   const selectedDistrict = selectedState?.districts.find(
@@ -96,8 +105,27 @@ export function SampleResultsView({
     { label: t.wizard.summary.nutrientsField, value: nutrientsLabel },
   ];
 
+  const handleCopySummary = async () => {
+    const summaryText = [
+      `${t.brand.name} — ${t.results.demoBannerTitle}`,
+      t.results.demoBannerBody,
+      '',
+      ...answerRows.map((row) => `${row.label}: ${row.value}`),
+      '',
+      `${t.results.heading}: ${demoCrops.map((c) => c.name[language]).join(', ')}`,
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(summaryText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked in some iframe contexts; ignore gracefully
+    }
+  };
+
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <div
         role="status"
         className="bg-[#EEF5EE] border border-[#B9D6BC] rounded-2xl p-5 flex items-start gap-3.5"
@@ -131,7 +159,7 @@ export function SampleResultsView({
             type="button"
             onClick={() => setShowAnswers((prev) => !prev)}
             aria-expanded={showAnswers}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F1F2E8] border border-[#C9CEBD] text-sm font-semibold text-[#1E241E] transition-colors min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#236B45]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F1F2E8] active:scale-[0.98] border border-[#C9CEBD] text-sm font-semibold text-[#1E241E] transition-all duration-150 min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#236B45]"
           >
             <Eye className="w-4 h-4 text-[#236B45]" aria-hidden="true" />
             <span>
@@ -148,8 +176,23 @@ export function SampleResultsView({
 
           <button
             type="button"
+            onClick={handleCopySummary}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F1F2E8] active:scale-[0.98] border border-[#C9CEBD] text-sm font-semibold text-[#1E241E] transition-all duration-150 min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#236B45]"
+          >
+            {copied ? (
+              <Check className="w-4 h-4 text-[#236B45]" aria-hidden="true" />
+            ) : (
+              <Copy className="w-4 h-4 text-[#236B45]" aria-hidden="true" />
+            )}
+            <span>
+              {copied ? t.results.actions.copiedSummary : t.results.actions.copySummary}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={onChangeInputs}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F1F2E8] border border-[#C9CEBD] text-sm font-semibold text-[#1E241E] transition-colors min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#236B45]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-[#F1F2E8] active:scale-[0.98] border border-[#C9CEBD] text-sm font-semibold text-[#1E241E] transition-all duration-150 min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#236B45]"
           >
             <Edit3 className="w-4 h-4 text-[#236B45]" aria-hidden="true" />
             <span>{t.results.actions.changeInputs}</span>
@@ -158,7 +201,7 @@ export function SampleResultsView({
           <button
             type="button"
             onClick={onTryAgain}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#236B45] hover:bg-[#1B5536] text-white text-sm font-semibold transition-colors min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#236B45]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#236B45] hover:bg-[#1B5536] active:scale-[0.98] text-white text-sm font-semibold transition-all duration-150 min-h-[44px] whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#236B45]"
           >
             <RotateCcw className="w-4 h-4" aria-hidden="true" />
             <span>{t.results.actions.tryAgain}</span>
@@ -166,39 +209,85 @@ export function SampleResultsView({
         </div>
       </div>
 
-      {showAnswers && (
-        <section
-          aria-label={t.results.answersPanelTitle}
-          className="bg-white border border-[#E2E5D9] rounded-2xl p-6"
-        >
-          <h3 className="font-display text-lg font-bold text-[#1E241E] mb-4">
-            {t.results.answersPanelTitle}
-          </h3>
-          <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-            {answerRows.map((row) => (
-              <div
-                key={row.label}
-                className="pb-3 border-b border-[#F1F2E8] sm:border-b-0"
-              >
-                <dt className="text-xs font-medium text-[#6C756A]">
-                  {row.label}
-                </dt>
-                <dd className="mt-1 text-sm sm:text-base font-semibold text-[#1E241E] tabular-nums">
-                  {row.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      )}
+      {/* Expandable Submitted Answers Panel */}
+      <AnimatePresence initial={false}>
+        {showAnswers && (
+          <motion.section
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            aria-label={t.results.answersPanelTitle}
+            className="bg-white border border-[#E2E5D9] rounded-2xl p-6"
+          >
+            <h3 className="font-display text-lg font-bold text-[#1E241E] mb-4">
+              {t.results.answersPanelTitle}
+            </h3>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+              {answerRows.map((row) => (
+                <div
+                  key={row.label}
+                  className="pb-3 border-b border-[#F1F2E8] sm:border-b-0"
+                >
+                  <dt className="text-xs font-medium text-[#6C756A]">
+                    {row.label}
+                  </dt>
+                  <dd className="mt-1 text-sm sm:text-base font-semibold text-[#1E241E] tabular-nums">
+                    {row.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {demoCrops.map((crop) => {
+      {/* Interactive Crop Focus Filter */}
+      <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#F1F2E8] border border-[#E2E5D9] rounded-xl w-fit max-w-full">
+        <button
+          type="button"
+          onClick={() => setFocusedCropId('all')}
+          className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-150 whitespace-nowrap min-h-[38px] focus-visible:outline-2 focus-visible:outline-[#236B45] ${
+            focusedCropId === 'all'
+              ? 'bg-white text-[#1E241E] shadow-xs font-semibold'
+              : 'text-[#4E584D] hover:text-[#1E241E]'
+          }`}
+        >
+          {t.results.actions.showAllCrops}
+        </button>
+        {demoCrops.map((crop) => (
+          <button
+            key={crop.id}
+            type="button"
+            onClick={() => setFocusedCropId(crop.id)}
+            className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-150 whitespace-nowrap min-h-[38px] focus-visible:outline-2 focus-visible:outline-[#236B45] ${
+              focusedCropId === crop.id
+                ? 'bg-white text-[#236B45] shadow-xs font-semibold'
+                : 'text-[#4E584D] hover:text-[#1E241E]'
+            }`}
+          >
+            {crop.name[language]}
+          </button>
+        ))}
+      </div>
+
+      <div
+        className={`grid gap-6 ${
+          visibleCrops.length === 1
+            ? 'grid-cols-1 max-w-2xl'
+            : 'grid-cols-1 lg:grid-cols-3'
+        }`}
+      >
+        {visibleCrops.map((crop) => {
           const imgFailed = failedImages[crop.id];
           return (
-            <article
+            <motion.article
+              layout
               key={crop.id}
-              className="bg-white border border-[#E2E5D9] rounded-2xl overflow-hidden flex flex-col"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-white border border-[#E2E5D9] hover:border-[#236B45]/40 transition-colors rounded-2xl overflow-hidden flex flex-col"
             >
               <div className="aspect-[4/3] w-full bg-[#EEF5EE] relative overflow-hidden">
                 {!imgFailed ? (
@@ -282,7 +371,7 @@ export function SampleResultsView({
                   </div>
                 </div>
               </div>
-            </article>
+            </motion.article>
           );
         })}
       </div>
