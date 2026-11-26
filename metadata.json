@@ -1,0 +1,6 @@
+{
+  "name": "BhoomiMitra – Your Smart Farming Companion",
+  "description": "A farmer-friendly smart crop recommendation platform helping growers explore suitable crops based on soil, location, season, rainfall, temperature, and water availability.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

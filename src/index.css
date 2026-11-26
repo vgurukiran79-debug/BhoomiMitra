@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #F8F8F1;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F1F2E8;
+  --border-subtle: #E2E5D9;
+  --border-strong: #C9CEBD;
+  --text-primary: #1E241E;
+  --text-secondary: #4E584D;
+  --text-muted: #6C756A;
+  --brand-primary: #236B45;
+  --brand-primary-hover: #1B5536;
+  --brand-secondary: #73A942;
+  --brand-tint: #EEF5EE;
+}
+
+@layer base {
+  html {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: 'DM Sans', 'Noto Sans Kannada', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Kannada', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
+    text-wrap: balance;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
